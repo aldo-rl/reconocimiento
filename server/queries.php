@@ -58,6 +58,25 @@ function saveUserCurrent($id, $modalidad, $userEntrada)
     return $data;
 }
 
+function saveUserCurrentHnoorarios($id, $modalidad)
+{
+    date_default_timezone_set('America/Mexico_City');
+
+    $fecha = date("Y-m-d");
+    $currentHour = date("H:i:s");
+
+
+    include('./conection.php');
+    mysqli_select_db($conection, $db) or die("error al conectar base de datos");
+
+    $data = mysqli_query(
+        $conection,
+        "INSERT INTO `current` (`num_tarjeta`, `entrada`, `user_base`,`fecha`,`estado`,`incidencia`,`nota`)
+        VALUES ($id, '$currentHour', $modalidad, '$fecha','','','' )"
+    ) or die("erro al insertar current user");
+    return $data;
+}
+
 
 function saveReportUserBase(
     $num_tarjetaB,
@@ -84,15 +103,26 @@ function saveReportUserBase(
     return $dataQuery;
 }
 
-function saveReportUserHonorary()
-{
+function saveReportUserHonorary(
+    $num_tarjetaH,
+    $periodoIH,
+    $periodoFH,
+    $nombreH,
+    $departamentoH,
+    $fechaH,
+    $H_entradaH,
+    $estadoH,
+) {
+    date_default_timezone_set('America/Mexico_City');
+
+    $currentHour = date("H:i:s");
 
     include('./conection.php');
     mysqli_select_db($conection, $db) or die("error al conectar base de datos");
     $dataQuery = mysqli_query(
         $conection,
         "INSERT INTO `reporteh` (`num_tarjetaH`, `periodoIH`, `periodoFH`, `nombreH`, `departamentoH`, `fechaH`, `H_entradaH`, `H_salidaH`, `estadoH`) VALUES
-        ($data, '2020-11-23', '2020-11-24', 'MITSUKI GUZMAN', 'direccion', '2020-11-23', '07:00:00', '01:00:00', 'OK')"
+        ($num_tarjetaH, '$periodoIH', '$periodoFH', '$nombreH', '$departamentoH', '$fechaH', '$H_entradaH', '$currentHour', '$estadoH')"
     ) or die("erro al insertar reporteH");
 
     return $dataQuery;
@@ -127,8 +157,32 @@ function saveIncidenceUserBase(
     return $dataQuery;
 }
 
-function saveIncidenceUserHonorary()
-{
+function saveIncidenceUserHonorary(
+    $num_tarjetaH,
+    $periodoIH,
+    $periodoFH,
+    $nombreH,
+    $departamentoH,
+    $fechaH,
+    $H_entradaH,
+    $estadoH,
+    $incidenciaH,
+    $notaH
+) {
+    date_default_timezone_set('America/Mexico_City');
+
+    $currentHour = date("H:i:s");
+
+    include('./conection.php');
+    mysqli_select_db($conection, $db) or die("error al conectar base de datos");
+    $dataQuery = mysqli_query(
+        $conection,
+        "INSERT INTO `incidenciah` (`num_tarjetaH`, `periodoIH`, `periodoFH`, `nombreH`, `departamentoH`, `fechaH`, `H_entradaH`, `H_salidaH`, `estadoH`, `incidenciaH`, `notaH`) VALUES
+        ($num_tarjetaH, '$periodoIH', '$periodoFH', '$nombreH', '$departamentoH', '$fechaH', '$H_entradaH', '$currentHour', '$estadoH', '$incidenciaH', '$notaH')"
+
+    ) or die("erro al insertar incidenciaH");
+
+    return $dataQuery;
 }
 
 

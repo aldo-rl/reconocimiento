@@ -1,6 +1,10 @@
 <?php
 include('./queries.php');
 
+// date_default_timezone_set('America/Mexico_City');
+// $hoy = date("H:i:s");
+// echo $hoy;
+
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
         $_POST = json_decode(file_get_contents('php://input'), true);
@@ -21,13 +25,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
         }
 
         // Guarda al docente de base
-        else if ($type_request == "save_user_b")
-            echo "---- save_user_b -----";
+        else if ($type_request == "save_user_currenth") {
+            $id = $_POST['id'];
+            $modalidad = $_POST['modalidad'];
+            // echo $modalidad;
+            $data = saveUserCurrentHnoorarios($id, $modalidad);
 
-        // Guarda al docente de honorarios
-        else if ($type_request == "save_user_h")
-            echo "---- save_user_h -----";
-
+            // añadir la de incidencia
+            echo $data;
+        }
 
 
 
@@ -56,29 +62,33 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $H_entradaB,
                 $estadoB
             );
-            // $dataIncidence = saveIncidenceUserBase(
-            //     $num_tarjetaB,
-            //     $periodoIB,
-            //     $periodoFB,
-            //     $nombreB,
-            //     $departamentoB,
-            //     $fechaB,
-            //     $H_entradaB,
-            //     $estadoB,
-            //     $incidenciaB,
-            //     $notaB
-            // );
             echo $dataReport;
-            // echo "---- save_reporte_user_b -----";
         }
 
         // Guarda el reporte del docente de honorarios
         else if ($type_request == "save_reporte_user_h") {
-            $F_nacimientoH = $_POST['F_nacimientoH'];
+            $num_tarjetaH = $_POST['num_tarjetaH'];
+            $periodoIH = $_POST['periodoIH'];
+            $periodoFH = $_POST['periodoFH'];
+            $nombreH = $_POST['nombreH'];
+            $departamentoH = $_POST['departamentoH'];
+            $fechaH = $_POST['fechaH'];
+            $H_entradaH = $_POST['H_entradaH'];
+            $estadoH = $_POST['estadoH'];
+            $incidenciaH = $_POST['estadoH'];
+            $notaH = $_POST['estadoH'];
 
-            $data = saveReportUserHonorary($F_nacimientoH);
-            echo $data;
-            // echo "---- save_reporte_user_h -----";
+            $dataReport = saveReportUserHonorary(
+                $num_tarjetaH,
+                $periodoIH,
+                $periodoFH,
+                $nombreH,
+                $departamentoH,
+                $fechaH,
+                $H_entradaH,
+                $estadoH
+            );
+            echo $dataReport;
         }
 
         // Guarda la incidencia del docente de base
@@ -111,10 +121,33 @@ switch ($_SERVER['REQUEST_METHOD']) {
         }
 
         // Guarda la incidencia del docente de honorarios
-        else if ($type_request == "save_incidencia_user_h")
-            echo "---- save_incidencia_user_h -----";
+        else if ($type_request == "save_incidencia_user_h") {
+            $num_tarjetaH = $_POST['num_tarjetaH'];
+            $periodoIH = $_POST['periodoIH'];
+            $periodoFH = $_POST['periodoFH'];
+            $nombreH = $_POST['nombreH'];
+            $departamentoH = $_POST['departamentoH'];
+            $fechaH = $_POST['fechaH'];
+            $H_entradaH = $_POST['H_entradaH'];
+            $estadoH = $_POST['estadoH'];
+            $incidenciaH = $_POST['incidenciaH'];
+            $notaH = $_POST['notaH'];
 
-        else
+
+            $dataIncidence = saveIncidenceUserHonorary(
+                $num_tarjetaH,
+                $periodoIH,
+                $periodoFH,
+                $nombreH,
+                $departamentoH,
+                $fechaH,
+                $H_entradaH,
+                $estadoH,
+                $incidenciaH,
+                $notaH
+            );
+            echo $dataIncidence;
+        } else
             echo "---- not found POST -----";
 
         break;

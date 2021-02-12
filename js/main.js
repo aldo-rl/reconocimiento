@@ -6,6 +6,12 @@ const DOMmessage = document.getElementById("message")
 const DOMname = document.getElementById("name")
 
 
+const mensajeEnDeteccion = 'Detectando identidad...'
+const mensajeEntradaExitosa = 'Entrada Exitosa'
+const mensajeSalidaExitosa = 'Salida exitosa'
+const mensajeUsurarioDetectado = "Usuario detectado"
+
+
 const tiempo = 10000
 
 function startvideo() {
@@ -49,14 +55,12 @@ const detectionFace = async () => {
     const displaySize = { width: video.width, height: video.height }
     faceapi.matchDimensions(canvas, displaySize)
     let fullFaceDescriptions = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceDescriptors()
-    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+    // const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
 
     const labels = await requestPhotos()
-    console.log('labels -> ', labels)
 
     const labeledFaceDescriptors = await Promise.all(
         labels && labels.map(async label => {
-            console.log(':::::::::: ', label)
             const img = await faceapi.fetchImage(label)
 
             // detect the face with the highest score in the image and compute it's landmarks and face descriptor
@@ -93,7 +97,7 @@ video.addEventListener('play', detectionFace)
 
 function Recognition(data) {
     video.pause()
-    DOMtitle.innerHTML = "Usurio detectado"
+    DOMtitle.innerHTML = mensajeUsurarioDetectado
     const user = data.split('-')
     // Obtine los datos del docente en las dos tablas
     axios.get(axiosPath, {
@@ -103,7 +107,6 @@ function Recognition(data) {
         }
     }).then(resDetected => {
         const dataUser = resDetected.data
-
         // Revisa si el usuario existe en la tabla current
         axios.get(axiosPath, {
             params: {
@@ -111,7 +114,6 @@ function Recognition(data) {
                 id: user[1],
             }
         }).then(res => {
-            // console.log('res:: ', res)
             // El usuario si existe en la tabla current es su salida
             if (res.data.length > 0) {
 
@@ -166,9 +168,13 @@ function Recognition(data) {
                                     id: userAllDate.num_tarjetaB,
                                 }
                             }).then(resDelete => {
-                                DOMmessage.innerHTML = "Salida Exitosa"
+                                DOMmessage.innerHTML = mensajeSalidaExitosa
                                 DOMname.innerHTML = user[0]
                                 setTimeout(() => {
+                                    DOMtitle.innerHTML = mensajeEnDeteccion
+                                    DOMmessage.innerHTML = ""
+                                    DOMname.innerHTML = ""
+                                    video.play()
                                     video.play()
                                 }, tiempo);
                             }).catch(errDelete => {
@@ -184,39 +190,105 @@ function Recognition(data) {
                     })
 
                 } else {
-                    // Save Reporte docente honorarios
-                    // axios.post(axiosPath, {
-                    //     type: 'save_reporte_user_h',
-                    //     F_nacimientoH: user[1],
+                    // Guardar los datos en la tabal reporteH e incidenciaH
+                    const userAllDate = dataUser[0]
+                    const usercurrentData = res.data[0]
+                    const dataReport = {
+                        num_tarjetaH: userAllDate.num_tarjetaH,
+                        periodoIH: usercurrentData.fecha,
+                        periodoFH: usercurrentData.fecha,
+                        nombreH: userAllDate.nombreH,
+                        departamentoH: userAllDate.departamentoH,
+                        fechaH: usercurrentData.fecha,
+                        H_entradaH: usercurrentData.entrada,
+                        estadoH: usercurrentData.estado,
+                    }
 
-                    // }).then(res => {
-                    //     console.log('res: ', res)
-                    // }).catch((err) => {
-                    //     console.log('errr:: ', err)
-                    // })
-                    // console.log('reporte honorarios')
+                    const dataIncidence = {
+                        num_tarjetaH: userAllDate.num_tarjetaH,
+                        periodoIH: usercurrentData.fecha,
+                        periodoFH: usercurrentData.fecha,
+                        nombreH: userAllDate.nombreH,
+                        departamentoH: userAllDate.departamentoH,
+                        fechaH: usercurrentData.fecha,
+                        H_entradaH: usercurrentData.entrada,
+                        estadoH: usercurrentData.estado,
+                        incidenciaH: usercurrentData.incidencia,
+                        notaH: usercurrentData.nota,
+                    }
+
+
+
+                    // Save Reporte docente honorarios
+                    axios.post(axiosPath, {
+                        type: 'save_reporte_user_h',
+                        ...dataReport,
+                    }).then(res => {
+                        // save incidencia Base
+                        axios.post(axiosPath, {
+                            type: 'save_incidencia_user_h',
+                            ...dataIncidence,
+                        }).then((resIncidence => {
+
+                            // delete user frmo current table
+                            axios.delete(axiosPath, {
+                                params: {
+                                    type: 'delete_user_current',
+                                    id: userAllDate.num_tarjetaH,
+                                }
+                            }).then(resDelete => {
+                                DOMmessage.innerHTML = mensajeSalidaExitosa
+                                DOMname.innerHTML = user[0]
+                                setTimeout(() => {
+                                    DOMtitle.innerHTML = mensajeEnDeteccion
+                                    DOMmessage.innerHTML = ""
+                                    DOMname.innerHTML = ""
+                                    video.play()
+                                }, tiempo);
+                            }).catch(errDelete => {
+                                console.log('deleet failed -> ', errDelete)
+
+                            })
+
+
+                        }))
+
+                    }).catch((err) => {
+                        console.log('errr report :: ', err)
+                    })
                 }
 
             } else {
                 // El usuario no existe en la tabla current y es su entrada
+                let senData = {}
+                if (dataUser[0].modalidad === 'base') {
+                    senData = {
+                        type: 'save_user_current',
+                        id: user[1],
+                        modalidad: 1,
+                        userEntrada: dataUser[0].H_entradaB
+                    }
+                } else {
+                    senData = {
+                        type: 'save_user_currenth',
+                        id: user[1],
+                        modalidad: 0,
+                    }
+                }
 
-                axios.post(axiosPath, {
-                    type: 'save_user_current',
-                    id: user[1],
-                    modalidad: dataUser[0].modalidad === 'base' ? 1 : 0,
-                    userEntrada: dataUser[0].H_entradaB
+                axios.post(axiosPath, senData).then((resSave) => {
 
-                }).then((resSave) => {
-
-                    DOMmessage.innerHTML = "Entrada Exitosa"
+                    DOMmessage.innerHTML = mensajeEntradaExitosa
                     DOMname.innerHTML = user[0]
                     setTimeout(() => {
-                        DOMtitle.innerHTML = "Usurio detectado"
-                        DOMmessage.innerHTML = "Entrada Exitosa"
-                        DOMname.innerHTML = user[0]
+                        DOMtitle.innerHTML = mensajeEnDeteccion
+                        DOMmessage.innerHTML = ""
+                        DOMname.innerHTML = ""
                         video.play()
                     }, tiempo);
 
+                }).catch(err => {
+                    console.log('erro', err)
                 })
             }
         })
