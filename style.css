@@ -1,0 +1,48 @@
+
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.container {
+    width: 100%;
+    min-height: 100vh;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.container-video {
+    position: relative;
+    margin-top: 50px;
+}
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.text-content {
+    text-align: center;
+}
+
+#title {
+    font-size: 18px;
+}
+#name {
+    display: inline-block;
+    margin-left: 50px;
+    font-size: 22px;
+}
+#message {
+    font-size: 22px;
+}
+
+.info {
+    display: flex;
+}
